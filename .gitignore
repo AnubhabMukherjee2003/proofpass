@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build & Cache
+dist/
+build/
+.next/
+out/
+*.o
+*.so
+*.a
+*.dylib
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Foundry specific
+forge-artifacts/
+cache/
+broadcast/
+
+# Temporary
+tmp/
+temp/
+/tmp/
+
+# Postman
+*.postman_collection.json.bak
+
+# Test coverage
+coverage/
+.nyc_output/

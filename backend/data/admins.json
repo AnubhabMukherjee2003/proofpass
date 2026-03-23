@@ -1,0 +1,10 @@
+[{
+    "username": "john_doe",
+    "password": "$2b$10$u7sH8m9n5",
+    "role": "superadmin"   
+},
+{
+    "username": "jane_smith",
+    "password": "$2b$10$u7sH8m9n5",
+    "role": "superadmin"   
+}]
