@@ -69,23 +69,21 @@ router.get('/', async (req, res) => {
     const eventsList = [];
 
     for (let i = 0; i < Number(totalEvents); i++) {
-      try {
-        const event = await contractRead.events(i);
-        if (event.active) {
-          eventsList.push({
-            eventId: i,
-            name: event.name,
-            location: event.location,
-            date: Number(event.date),
-            price: event.price.toString(),
-            capacity: Number(event.capacity),
-            ticketsSold: Number(event.ticketsSold),
-            imageUrl: event.imageUrl,
-          });
-        }
-      } catch (err) {
-        // Event doesn't exist, skip
+
+      const event = await contractRead.events(i);
+      if (event.active) {
+        eventsList.push({
+          eventId: i,
+          name: event.name,
+          location: event.location,
+          date: Number(event.date),
+          price: event.price.toString(),
+          capacity: Number(event.capacity),
+          ticketsSold: Number(event.ticketsSold),
+          imageUrl: event.imageUrl,
+        });
       }
+
     }
 
     res.json(eventsList);

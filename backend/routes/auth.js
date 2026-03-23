@@ -24,7 +24,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Generate OTP using cryptographic hash
     const otp = generateOTP(phone);
-
+    console.log(`[DEV] OTP for ${phone}: ${otp}`);
     // Send via Twilio (if configured)
     if (process.env.TWILIO_ACCOUNT_SID && twilioPhone) {
       try {
@@ -92,19 +92,6 @@ router.get('/me', authMiddleware, (req, res) => {
 });
 
 /**
- * POST /api/auth/logout
- * MVP: client discards token locally
- */
-router.post('/logout', authMiddleware, (req, res) => {
-  try {
-    // In production, could add jti to Redis blocklist
-    res.json({ message: 'Logged out successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
  * POST /api/auth/admin-login
  * Admin login with username and password
  * Returns admin JWT token for protected routes
@@ -119,14 +106,14 @@ router.post('/admin-login', async (req, res) => {
 
     // Verify credentials
     const admin = verifyAdminCredentials(username, password);
-    
+
     if (!admin) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Issue admin JWT token
     const token = signAdminJWT(username, admin.role);
-    res.json({ 
+    res.json({
       message: 'Admin login successful',
       token,
       admin: {
@@ -146,7 +133,7 @@ router.post('/admin-login', async (req, res) => {
  */
 router.get('/admin-me', adminTokenMiddleware, (req, res) => {
   try {
-    res.json({ 
+    res.json({
       username: req.admin.username,
       role: req.admin.role,
       type: 'admin'

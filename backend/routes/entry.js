@@ -30,12 +30,17 @@ const contract = new ethers.Contract(
   wallet
 );
 
+router.post('/:ticketId/scan/:tokenid', adminTokenMiddleware, async (req, res) => {
+  // extract phone number from tokenid
+  // give otp from phone and ticketid, 
+})
 /**
  * POST /api/entry/:ticketId/confirm
  * Validate ticket at gate (admin only)
  * Requires admin token
  */
 router.post('/:ticketId/confirm', adminTokenMiddleware, async (req, res) => {
+  // first verify OTP with the ticketid and phone number, then mark as used on contract
   try {
     const { ticketId } = req.params;
     const { phone } = req.body;

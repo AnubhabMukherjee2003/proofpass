@@ -123,27 +123,6 @@ function adminTokenMiddleware(req, res, next) {
   }
 }
 
-/**
- * Middleware: Verify admin role (phone-based, kept for backward compatibility)
- */
-function adminMiddleware(req, res, next) {
-  try {
-    const adminPhone = process.env.ADMIN_PHONE;
-    if (!req.user) {
-      return res.status(401).json({ error: 'Missing authentication' });
-    }
-    
-    // Check if phone matches admin phone
-    if (req.user.phone !== adminPhone) {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-    
-    next();
-  } catch (error) {
-    res.status(403).json({ error: error.message });
-  }
-}
-
 module.exports = {
   verifyJWT,
   signJWT,
@@ -152,5 +131,4 @@ module.exports = {
   verifyAdminCredentials,
   authMiddleware,
   adminTokenMiddleware,
-  adminMiddleware,
 };
