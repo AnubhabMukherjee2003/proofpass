@@ -32,34 +32,23 @@ const contract = new ethers.Contract(
 );
 
 /**
- * POST /api/payments/fake
- * Simulate payment (MVP only)
- */
-router.post('/fake', (req, res) => {
-  try {
-    const paymentId = `PAY_${Date.now()}`;
-    res.json({ paymentId });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
  * POST /api/tickets
- * Book a ticket after payment
+ * Book a ticket after payment - creates fake payment and books ticket atomically
+ * Requires: eventId, price (must match event.price)
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { eventId, paymentId } = req.body;
+    const { eventId, price } = req.body;
     const phone = req.user.phone;
 
-    if (!eventId || !paymentId) {
-      return res.status(400).json({ error: 'eventId and paymentId required' });
+    if (!eventId) {
+      return res.status(400).json({ error: 'eventId required' });
     }
 
-    // Verify event exists and is active
+    // Verify event exists, is active, and validate price
+    let event;
     try {
-      const event = await contractRead.events(eventId);
+      event = await contractRead.events(eventId);
       if (!event.active) {
         return res.status(400).json({ error: 'Event inactive' });
       }
@@ -69,6 +58,18 @@ router.post('/', authMiddleware, async (req, res) => {
     } catch (err) {
       return res.status(400).json({ error: 'Event not found' });
     }
+
+    // Validate price matches event price (in rupees)
+    const eventPrice = Number(event.price);
+    if (!price) {
+      return res.status(400).json({ error: 'Price required', eventPrice });
+    }
+    if (Number(price) !== eventPrice) {
+      return res.status(400).json({ error: 'Price mismatch', expected: eventPrice, provided: price });
+    }
+
+    // Create fake payment ID
+    const paymentId = `PAY_${Date.now()}`;
 
     // Compute hashes
     const phoneHash = computePhoneHash(phone, eventId);
@@ -82,6 +83,10 @@ router.post('/', authMiddleware, async (req, res) => {
 
       res.json({
         message: 'Ticket booked successfully',
+        ticketId: receipt.logs[0]?.topics[1] ? BigInt(receipt.logs[0].topics[1]).toString() : 'N/A',
+        eventId: Number(eventId),
+        price: eventPrice,
+        currency: 'INR',
         txHash: receipt.hash,
       });
     } catch (contractError) {
@@ -92,6 +97,22 @@ router.post('/', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Error booking ticket:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/payments/fake
+ * Simulate payment (MVP only) - DEPRECATED: Use POST /api/tickets instead
+ */
+router.post('/fake', (req, res) => {
+  try {
+    const paymentId = `PAY_${Date.now()}`;
+    res.json({ 
+      paymentId,
+      warning: 'This endpoint is deprecated. Use POST /api/tickets instead for atomic booking.' 
+    });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

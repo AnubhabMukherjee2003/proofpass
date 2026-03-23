@@ -39,10 +39,11 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Error handler
+// Error handler (must have 4 parameters to work as Express error handler)
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  console.error('Unhandled error:', err.message || err);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({ error: err.message || 'Internal server error' });
 });
 
 // Start server

@@ -50,8 +50,14 @@
             },
             "url": {
               "raw": "{{base_url}}/api/auth/admin-login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "admin-login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "admin-login"
+              ]
             }
           }
         },
@@ -71,8 +77,14 @@
             },
             "url": {
               "raw": "{{base_url}}/api/auth/send-otp",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "send-otp"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "send-otp"
+              ]
             }
           }
         },
@@ -92,8 +104,14 @@
             },
             "url": {
               "raw": "{{base_url}}/api/auth/verify-otp",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "verify-otp"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-otp"
+              ]
             }
           }
         },
@@ -109,8 +127,37 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/auth/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "me"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Admin Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/admin-me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "admin-me"
+              ]
             }
           }
         }
@@ -125,8 +172,13 @@
             "method": "GET",
             "url": {
               "raw": "{{base_url}}/api/events",
-              "host": ["{{base_url}}"],
-              "path": ["api", "events"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
             }
           }
         },
@@ -136,8 +188,14 @@
             "method": "GET",
             "url": {
               "raw": "{{base_url}}/api/events/{{event_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "events", "{{event_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{event_id}}"
+              ]
             }
           }
         },
@@ -161,8 +219,13 @@
             },
             "url": {
               "raw": "{{base_url}}/api/events",
-              "host": ["{{base_url}}"],
-              "path": ["api", "events"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
             }
           }
         },
@@ -178,8 +241,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/events/{{event_id}}/deactivate",
-              "host": ["{{base_url}}"],
-              "path": ["api", "events", "{{event_id}}", "deactivate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{event_id}}",
+                "deactivate"
+              ]
             }
           }
         }
@@ -194,8 +264,14 @@
             "method": "POST",
             "url": {
               "raw": "{{base_url}}/api/payments/fake",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payments", "fake"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "fake"
+              ]
             }
           }
         },
@@ -215,12 +291,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"eventId\": \"{{event_id}}\", \"paymentId\": \"PAY_123456\"}"
+              "raw": "{\"eventId\": \"{{event_id}}\", \"price\": 499}"
             },
             "url": {
               "raw": "{{base_url}}/api/tickets",
-              "host": ["{{base_url}}"],
-              "path": ["api", "tickets"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
             }
           }
         },
@@ -236,8 +317,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/tickets",
-              "host": ["{{base_url}}"],
-              "path": ["api", "tickets"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
             }
           }
         },
@@ -253,8 +339,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/tickets/{{ticket_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "tickets", "{{ticket_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{ticket_id}}"
+              ]
             }
           }
         }
@@ -283,8 +375,15 @@
             },
             "url": {
               "raw": "{{base_url}}/api/entry/{{ticket_id}}/confirm",
-              "host": ["{{base_url}}"],
-              "path": ["api", "entry", "{{ticket_id}}", "confirm"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "entry",
+                "{{ticket_id}}",
+                "confirm"
+              ]
             }
           }
         },
@@ -300,8 +399,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/entry/{{ticket_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "entry", "{{ticket_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "entry",
+                "{{ticket_id}}",
+                "status"
+              ]
             }
           }
         },
@@ -317,8 +423,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/entry/stats/{{event_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "entry", "stats", "{{event_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "entry",
+                "stats",
+                "{{event_id}}"
+              ]
             }
           }
         }
@@ -330,8 +443,12 @@
         "method": "GET",
         "url": {
           "raw": "{{base_url}}/health",
-          "host": ["{{base_url}}"],
-          "path": ["health"]
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
         }
       }
     }

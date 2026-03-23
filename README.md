@@ -65,6 +65,7 @@ POST   /api/auth/admin-login       - Admin login
 POST   /api/auth/send-otp          - Send OTP
 POST   /api/auth/verify-otp        - Verify OTP & get token
 GET    /api/auth/me                - Get current user
+GET    /api/auth/admin-me          - Get admin info (admin only)
 ```
 
 ### Events
@@ -77,15 +78,15 @@ POST   /api/events/:id/deactivate  - Deactivate event (admin)
 
 ### Tickets & Payments
 ```
-POST   /api/payments/fake          - Simulate payment
-POST   /api/tickets                - Book ticket
+POST   /api/tickets                - Book ticket (includes price in INR)
 GET    /api/tickets                - Get user tickets
-GET    /api/tickets/:id            - Get ticket details
+GET    /api/tickets/:id            - Get ticket details (verify ownership)
+POST   /api/payments/fake          - Simulate payment (deprecated)
 ```
 
 ### Entry Management
 ```
-POST   /api/entry/:id/confirm      - Confirm entry (admin)
+POST   /api/entry/:id/confirm      - Confirm entry & verify account owner (admin)
 GET    /api/entry/:id/status       - Check ticket status
 GET    /api/entry/stats/:eventId   - Get event stats (admin)
 ```
@@ -168,7 +169,7 @@ PRIVATE_KEY=your_private_key
 
 # Auth
 JWT_SECRET=your_jwt_secret
-ADMIN_PHONE=+919876543210
+ADMIN_JWT_SECRET=admin_secret
 SALT=proofpass-salt-v1
 
 # Server

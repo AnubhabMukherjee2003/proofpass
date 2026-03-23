@@ -1,7 +1,7 @@
 const express = require('express');
 const { ethers } = require('ethers');
 const { authMiddleware, adminMiddleware, adminTokenMiddleware } = require('../utils/auth');
-const { computePhoneHash } = require('../utils/crypto');
+const { computePhoneHash, computeGlobalPhoneHash } = require('../utils/crypto');
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ const SIMPLE_ABI = [
   "function markAsUsed(uint256 ticketId, bytes32 inputHash) external",
   "function tickets(uint256) public view returns (uint256 eventId, bytes32 phoneHash, bool used, bytes32 paymentId)",
   "function events(uint256) public view returns (string name, string location, uint256 date, uint256 price, uint256 capacity, uint256 ticketsSold, bool active, string imageUrl)",
+  "function getGlobalUserTickets(bytes32 globalPhoneHash) public view returns (uint256[])",
 ];
 
 // Initialize provider and contract
@@ -37,10 +38,9 @@ router.post('/:ticketId/scan/:tokenid', adminTokenMiddleware, async (req, res) =
 /**
  * POST /api/entry/:ticketId/confirm
  * Validate ticket at gate (admin only)
- * Requires admin token
+ * Requires admin token and verify actual owner
  */
 router.post('/:ticketId/confirm', adminTokenMiddleware, async (req, res) => {
-  // first verify OTP with the ticketid and phone number, then mark as used on contract
   try {
     const { ticketId } = req.params;
     const { phone } = req.body;
@@ -49,9 +49,17 @@ router.post('/:ticketId/confirm', adminTokenMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Phone number required' });
     }
 
-    // Get ticket to find eventId
+    // Fetch ticket and event info
     const ticket = await contractRead.tickets(ticketId);
     const eventId = ticket.eventId;
+
+    // Verify ownership: check if this ticket belongs to the provided phone number
+    const globalPhoneHash = computeGlobalPhoneHash(phone);
+    const userTicketIds = await contractRead.getGlobalUserTickets(globalPhoneHash);
+
+    if (!userTicketIds.map(id => id.toString()).includes(ticketId.toString())) {
+      return res.status(403).json({ error: 'Ticket not owned by this account' });
+    }
 
     // Recompute phoneHash to verify
     const computedHash = computePhoneHash(phone, eventId);
@@ -64,6 +72,7 @@ router.post('/:ticketId/confirm', adminTokenMiddleware, async (req, res) => {
       res.json({
         status: 'ENTRY GRANTED',
         ticketId: Number(ticketId),
+        eventId: Number(eventId),
         txHash: receipt.hash,
       });
     } catch (contractError) {

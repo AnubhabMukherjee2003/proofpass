@@ -88,32 +88,40 @@ curl http://localhost:3000/api/auth/me \
 
 ### Ticket Booking
 ```bash
-# Step 1: Create payment (returns paymentId)
-curl -X POST http://localhost:3000/api/payments/fake \
-  -H "Content-Type: application/json"
-
-# Step 2: Book ticket
+# Book ticket (unified endpoint - includes price validation)
 curl -X POST http://localhost:3000/api/tickets \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <USER_TOKEN>" \
-  -d '{"eventId":0,"paymentId":"PAY_1234567890"}'
+  -d '{
+    "eventId": 0,
+    "price": 499
+  }'
 
-# Step 3: List user tickets
+# Note: price must match event.price (in INR)
+# Response includes: ticketId, eventId, price, currency, txHash
+
+# List user tickets
 curl http://localhost:3000/api/tickets \
   -H "Authorization: Bearer <USER_TOKEN>"
 
-# Step 4: Get single ticket
+# Get single ticket (verify ownership)
 curl http://localhost:3000/api/tickets/0 \
   -H "Authorization: Bearer <USER_TOKEN>"
+
+# Deprecated - Old payment simulation endpoint
+curl -X POST http://localhost:3000/api/payments/fake
 ```
 
 ### Entry Management (admin only)
 ```bash
-# Confirm entry at gate
+# Confirm entry at gate (with account ownership verification)
 curl -X POST http://localhost:3000/api/entry/0/confirm \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <ADMIN_TOKEN>" \
   -d '{"phone":"+919876543210"}'
+
+# Response: Verifies ticket ownership before marking as used
+# Returns: ENTRY GRANTED with ticketId, eventId, txHash
 
 # Check ticket status
 curl http://localhost:3000/api/entry/0/status \
