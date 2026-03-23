@@ -356,7 +356,32 @@
       "name": "Entry Management",
       "item": [
         {
-          "name": "Confirm Entry",
+          "name": "1️⃣ Scan QR - Generate OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/entry/{{ticket_id}}/scan/{{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "entry",
+                "{{ticket_id}}",
+                "scan",
+                "{{token}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2️⃣ Confirm Entry - Verify OTP",
           "request": {
             "method": "POST",
             "header": [
@@ -371,7 +396,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"phone\": \"{{phone}}\"}"
+              "raw": "{\"phone\": \"{{phone}}\", \"otp\": \"123456\"}"
             },
             "url": {
               "raw": "{{base_url}}/api/entry/{{ticket_id}}/confirm",

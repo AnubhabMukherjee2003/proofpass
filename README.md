@@ -84,12 +84,24 @@ GET    /api/tickets/:id            - Get ticket details (verify ownership)
 POST   /api/payments/fake          - Simulate payment (deprecated)
 ```
 
-### Entry Management
+### Entry Management (Two-Step OTP Verification)
 ```
-POST   /api/entry/:id/confirm      - Confirm entry & verify account owner (admin)
-GET    /api/entry/:id/status       - Check ticket status
-GET    /api/entry/stats/:eventId   - Get event stats (admin)
+POST   /api/entry/:id/scan/:userToken   - Step 1: Generate OTP from scanned QR
+POST   /api/entry/:id/confirm           - Step 2: Verify OTP and confirm entry
+GET    /api/entry/:id/status            - Check ticket status
+GET    /api/entry/stats/:eventId        - Get event stats
 ```
+
+**Two-Step Gate Entry Process:**
+1. User gets QR code with ticket ID + JWT token (after booking)
+2. Admin scans QR → Calls `/scan/:userToken` → System generates OTP
+3. Admin shows OTP to user (or sends via SMS in production)
+4. Admin enters OTP → Calls `/confirm` with phone + OTP
+5. System verifies:
+   - OTP matches (5-minute time window)
+   - Phone matches ticket owner
+   - Ticket not already used
+6. ✅ Entry confirmed, ticket marked as used on blockchain
 
 ---
 

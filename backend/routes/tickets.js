@@ -64,7 +64,7 @@ router.post('/', authMiddleware, async (req, res) => {
     if (!price) {
       return res.status(400).json({ error: 'Price required', eventPrice });
     }
-    if (Number(price) !== eventPrice) {
+    if (Number(price) < eventPrice) {
       return res.status(400).json({ error: 'Price mismatch', expected: eventPrice, provided: price });
     }
 

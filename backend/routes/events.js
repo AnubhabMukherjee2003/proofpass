@@ -152,7 +152,7 @@ router.post('/', adminTokenMiddleware, upload.single('image'), async (req, res) 
       name,
       location,
       Number(date),
-      price, // Price in wei (pass as string/number directly)
+      price, // Price 
       Number(capacity),
       imageUrl
     );

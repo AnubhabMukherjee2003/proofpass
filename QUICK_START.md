@@ -112,24 +112,49 @@ curl http://localhost:3000/api/tickets/0 \
 curl -X POST http://localhost:3000/api/payments/fake
 ```
 
-### Entry Management (admin only)
+### Entry Management - Two-Step OTP Verification (Admin Only)
 ```bash
-# Confirm entry at gate (with account ownership verification)
+# STEP 1: Generate OTP from scanned QR code
+# QR contains: ticketId + userToken (JWT)
+curl -X POST http://localhost:3000/api/entry/0/scan/<USER_TOKEN> \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+
+# Response:
+# {
+#   "status": "OTP_GENERATED",
+#   "message": "OTP generated for +919876543210",
+#   "ticketId": 0,
+#   "phone": "+919876543210",
+#   "otp": "123456" (dev mode only),
+#   "expiresIn": "10 minutes"
+# }
+
+# STEP 2: Verify OTP and confirm entry
+# Admin enters OTP received by user
 curl -X POST http://localhost:3000/api/entry/0/confirm \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <ADMIN_TOKEN>" \
-  -d '{"phone":"+919876543210"}'
+  -d '{"phone":"+919876543210","otp":"123456"}'
 
-# Response: Verifies ticket ownership before marking as used
-# Returns: ENTRY GRANTED with ticketId, eventId, txHash
+# Response (on success):
+# {
+#   "status": "✅ ENTRY GRANTED",
+#   "ticketId": 0,
+#   "eventId": 0,
+#   "phone": "+919876543210",
+#   "txHash": "0x...",
+#   "timestamp": "2026-03-23T..."
+# }
 
-# Check ticket status
+# Check ticket status (without confirming)
 curl http://localhost:3000/api/entry/0/status \
   -H "Authorization: Bearer <ADMIN_TOKEN>"
 
 # Get event attendance stats
 curl http://localhost:3000/api/entry/stats/0 \
   -H "Authorization: Bearer <ADMIN_TOKEN>"
+
+# Response: { eventId: 0, capacity: 500, ticketsSold: 150, remaining: 350 }
 ```
 
 ## 🔐 Credentials
