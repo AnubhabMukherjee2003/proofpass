@@ -17,10 +17,17 @@ import { useAuth } from '@/context/AuthContext';
 export default function TicketDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Auth guard - redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/send-otp');
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     loadTicket();

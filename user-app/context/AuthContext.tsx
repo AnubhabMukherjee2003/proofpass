@@ -36,11 +36,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const phone = await secureStorage.getToken(PHONE_KEY);
 
         if (token && phone) {
-          setUser({ token, phone });
           apiService.setAuthToken(token);
+          
+          try {
+            // Validate token by calling an authenticated endpoint
+            await apiService.getInstance().get(API_ENDPOINTS.EVENTS.LIST);
+            setUser({ token, phone });
+          } catch (validateErr) {
+            // Token invalid or expired, clear it
+            console.log('Token validation failed, clearing auth');
+            await secureStorage.clearAll([TOKEN_KEY, PHONE_KEY]);
+            setUser(null);
+            apiService.setAuthToken(null);
+          }
         }
       } catch (err) {
         console.error('Error initializing auth:', err);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }

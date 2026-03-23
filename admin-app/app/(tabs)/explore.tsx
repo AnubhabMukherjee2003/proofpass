@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   ScrollView,
@@ -16,8 +16,15 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function EntryVerificationScreen() {
   const router = useRouter();
-  const { user } = useAdminAuth();
+  const { user, isLoading: authLoading } = useAdminAuth();
   const [step, setStep] = useState<'scan' | 'verify'>('scan');
+
+  // Auth guard - redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/login');
+    }
+  }, [user, authLoading, router]);
   const [ticketId, setTicketId] = useState('');
   const [userToken, setUserToken] = useState('');
   const [phone, setPhone] = useState('');

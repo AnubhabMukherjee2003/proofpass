@@ -16,11 +16,18 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function EventsScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Auth guard - redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/send-otp');
+    }
+  }, [user, authLoading, router]);
 
   const loadEvents = async () => {
     try {
@@ -67,7 +74,16 @@ export default function EventsScreen() {
     return `₹${numPrice.toFixed(0)}`;
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  // Don't render if user is not authenticated (guard)
+  if (!user) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />

@@ -16,11 +16,18 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function MyTicketsScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Auth guard - redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/send-otp');
+    }
+  }, [user, authLoading, router]);
 
   const loadTickets = async () => {
     try {
@@ -62,7 +69,16 @@ export default function MyTicketsScreen() {
     return `₹${price}`;
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  // Don't render if user is not authenticated (guard)
+  if (!user) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />

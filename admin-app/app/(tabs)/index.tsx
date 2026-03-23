@@ -16,11 +16,18 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function AdminEventsScreen() {
   const router = useRouter();
-  const { user, logout } = useAdminAuth();
+  const { user, isLoading: authLoading, logout } = useAdminAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Auth guard - redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/login');
+    }
+  }, [user, authLoading, router]);
 
   const loadEvents = async () => {
     try {
@@ -75,7 +82,16 @@ export default function AdminEventsScreen() {
     return `₹${numPrice.toFixed(0)}`;
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  // Don't render if user is not authenticated (guard)
+  if (!user) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
