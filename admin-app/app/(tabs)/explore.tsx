@@ -1,112 +1,332 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { adminEntryService } from '@/services/admin';
+import { handleApiError, getErrorMessage } from '@/utils/errors';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function EntryVerificationScreen() {
+  const router = useRouter();
+  const { user } = useAdminAuth();
+  const [step, setStep] = useState<'scan' | 'verify'>('scan');
+  const [ticketId, setTicketId] = useState('');
+  const [userToken, setUserToken] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState<any>(null);
 
-export default function TabTwoScreen() {
+  const handleScanTicket = async () => {
+    if (!ticketId.trim() || !userToken.trim()) {
+      Alert.alert('Error', 'Please enter ticket ID and user token');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      setError(null);
+      const result = await adminEntryService.scanTicket(parseInt(ticketId), userToken);
+      setScanResult(result);
+      setPhone(result.phone);
+      setStep('verify');
+    } catch (err) {
+      const apiError = handleApiError(err);
+      setError(getErrorMessage(apiError));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleConfirmEntry = async () => {
+    if (!phone.trim() || !otp.trim()) {
+      Alert.alert('Error', 'Please enter phone and OTP');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      setError(null);
+      const result = await adminEntryService.confirmEntry(phone, otp);
+      Alert.alert('Success', '✅ Entry Granted!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            setStep('scan');
+            setTicketId('');
+            setUserToken('');
+            setPhone('');
+            setOtp('');
+            setScanResult(null);
+          },
+        },
+      ]);
+    } catch (err) {
+      const apiError = handleApiError(err);
+      Alert.alert('Verification Failed', getErrorMessage(apiError));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Entry Verification</Text>
+        <Text style={styles.userInfo}>Admin: {user?.username}</Text>
+      </View>
+
+      <ScrollView style={styles.scrollView}>
+        {step === 'scan' ? (
+          <View style={styles.stepContainer}>
+            <Text style={styles.stepTitle}>Step 1: Scan QR Code</Text>
+            <Text style={styles.stepDescription}>
+              Scan the QR code on the user's ticket to get the ticket ID and user token
+            </Text>
+
+            <Text style={styles.label}>Ticket ID</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter ticket ID"
+              placeholderTextColor="#999"
+              value={ticketId}
+              onChangeText={setTicketId}
+              keyboardType="number-pad"
+              editable={!isLoading}
+            />
+
+            <Text style={styles.label}>User Token</Text>
+            <TextInput
+              style={[styles.input, styles.multilineInput]}
+              placeholder="Enter user JWT token"
+              placeholderTextColor="#999"
+              value={userToken}
+              onChangeText={setUserToken}
+              multiline
+              editable={!isLoading}
+            />
+
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <TouchableOpacity
+              style={[styles.button, isLoading && styles.buttonDisabled]}
+              onPress={handleScanTicket}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Scan & Proceed</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.stepContainer}>
+            <Text style={styles.stepTitle}>Step 2: Verify OTP</Text>
+            <Text style={styles.stepDescription}>
+              User has received an OTP via SMS. Enter it to confirm entry.
+            </Text>
+
+            {scanResult && (
+              <View style={styles.infoBox}>
+                <Text style={styles.infoLabel}>Ticket ID: {scanResult.ticketId}</Text>
+                <Text style={styles.infoLabel}>Phone: {scanResult.phone}</Text>
+                <Text style={styles.infoLabel}>
+                  OTP expires in: {scanResult.expiresIn}
+                </Text>
+                {scanResult.otp && (
+                  <View style={styles.devNote}>
+                    <Text style={styles.devLabel}>[DEV] OTP: {scanResult.otp}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            <Text style={styles.label}>Phone Number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone number"
+              placeholderTextColor="#999"
+              value={phone}
+              onChangeText={setPhone}
+              editable={false}
+            />
+
+            <Text style={styles.label}>One-Time Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="000000"
+              placeholderTextColor="#999"
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+              maxLength={6}
+              editable={!isLoading}
+            />
+
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <TouchableOpacity
+              style={[styles.button, isLoading && styles.buttonDisabled]}
+              onPress={handleConfirmEntry}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Confirm Entry</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => {
+                setStep('scan');
+                setTicketId('');
+                setUserToken('');
+                setScanResult(null);
+              }}
+              disabled={isLoading}
+            >
+              <Text style={styles.secondaryButtonText}>Scan Another Ticket</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  header: {
+    backgroundColor: '#fff',
+    paddingTop: 40,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  userInfo: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  stepContainer: {
+    padding: 20,
+  },
+  stepTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 8,
+  },
+  stepDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+    marginBottom: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 16,
+    color: '#000',
+    backgroundColor: '#fff',
+  },
+  multilineInput: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  infoBox: {
+    backgroundColor: '#e6f7ff',
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+    padding: 12,
+    marginBottom: 20,
+    borderRadius: 4,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#0066cc',
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  devNote: {
+    backgroundColor: '#fff9e6',
+    padding: 8,
+    borderRadius: 4,
+    marginTop: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff9500',
+  },
+  devLabel: {
+    fontSize: 12,
+    color: '#ff6600',
+    fontFamily: 'monospace',
+  },
+  errorText: {
+    color: '#dc3545',
+    fontSize: 14,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryButton: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  secondaryButtonText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
