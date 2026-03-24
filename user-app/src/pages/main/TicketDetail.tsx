@@ -191,7 +191,7 @@ const TicketDetail: React.FC = () => {
         {/* Event Info Card */}
         <IonCard className="ticket-event-card">
           <div className="ticket-event-image">
-            <img src={ticket.event?.image} alt={ticket.event?.name} />
+            <img src={ticket.event?.imageUrl} alt={ticket.event?.name} />
           </div>
           <IonCardContent>
             <h1>{ticket.event?.name}</h1>

@@ -70,8 +70,8 @@ const EventDetail: React.FC = () => {
       });
       
       // Call the bookTicket API with eventId and price (backend generates paymentId)
-      // eventId is number, price is string so convert to number
-      const response = await api.bookTicket(event.eventId, Number(event.price));
+      // eventId needs to be string, price is number
+      const response = await api.bookTicket(event.eventId.toString(), Number(event.price));
       
       if (response.data) {
         alert('Booking successful! Your ticket has been booked.');

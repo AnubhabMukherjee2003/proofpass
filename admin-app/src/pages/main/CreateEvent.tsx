@@ -31,15 +31,23 @@ const CreateEvent: React.FC = () => {
     name: '',
     location: '',
     date: Math.floor(Date.now() / 1000) + 86400, // Tomorrow
-    price: '',
-    capacity: '',
-    imageUrl: '',
+    price: 0,
+    capacity: 0,
+    image: '',
+    description: '',
   });
 
   const handleInputChange = (field: keyof CreateEventRequest, value: any) => {
+    let convertedValue: any = value;
+    
+    // Convert string to number for numeric fields
+    if (field === 'price' || field === 'capacity') {
+      convertedValue = value ? Number(value) : 0;
+    }
+    
     setFormData({
       ...formData,
-      [field]: value,
+      [field]: convertedValue,
     });
     setError('');
   };
@@ -170,8 +178,8 @@ const CreateEvent: React.FC = () => {
               <IonLabel position="stacked">Image URL (Optional)</IonLabel>
               <IonInput
                 placeholder="ipfs://... or https://..."
-                value={formData.imageUrl}
-                onIonChange={(e) => handleInputChange('imageUrl', e.detail.value)}
+                value={formData.image}
+                onIonChange={(e) => handleInputChange('image', e.detail.value)}
               />
             </IonItem>
 
