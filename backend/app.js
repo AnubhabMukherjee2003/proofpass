@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
 const ticketRoutes = require('./routes/tickets');
 const entryRoutes = require('./routes/entry');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +34,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/payments', ticketRoutes); // Fake payment endpoint
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/entry', entryRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use((req, res) => {

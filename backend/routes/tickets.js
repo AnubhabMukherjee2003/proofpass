@@ -140,14 +140,35 @@ router.get('/', authMiddleware, async (req, res) => {
         const ticket = await contractRead.tickets(ticketId);
         const event = await contractRead.events(ticket.eventId);
 
+        // Compute status: used > expired > active
+        let status = 'active';
+        if (ticket.used) {
+          status = 'used';
+        } else if (Number(event.date) * 1000 < Date.now()) {
+          status = 'expired';
+        }
+
         tickets.push({
+          id: ticketId.toString(),
           ticketId: Number(ticketId),
           eventId: Number(ticket.eventId),
-          eventName: event.name,
-          date: Number(event.date),
-          location: event.location,
-          used: ticket.used,
-          imageUrl: event.imageUrl,
+          userId: '', // Not available from contract
+          event: {
+            eventId: Number(ticket.eventId),
+            name: event.name,
+            location: event.location,
+            date: Number(event.date),
+            price: event.price.toString(),
+            capacity: Number(event.capacity),
+            ticketsSold: Number(event.ticketsSold),
+            imageUrl: event.imageUrl,
+          },
+          status,
+          qrCode: '', // Would be generated on frontend
+          transactionHash: '', // Not available from list endpoint
+          bookedAt: 0, // Not available from contract
+          usedAt: ticket.used ? Date.now() / 1000 : undefined,
+          price: Number(event.price),
         });
       } catch (err) {
         console.warn(`Error fetching ticket ${ticketId}:`, err.message);
@@ -182,14 +203,35 @@ router.get('/:ticketId', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Ticket not owned by user' });
     }
 
+    // Compute status: used > expired > active
+    let status = 'active';
+    if (ticket.used) {
+      status = 'used';
+    } else if (Number(event.date) * 1000 < Date.now()) {
+      status = 'expired';
+    }
+
     res.json({
+      id: ticketId,
       ticketId: Number(ticketId),
       eventId: Number(ticket.eventId),
-      eventName: event.name,
-      date: Number(event.date),
-      location: event.location,
-      used: ticket.used,
-      imageUrl: event.imageUrl,
+      userId: '', // Not available from contract
+      event: {
+        eventId: Number(ticket.eventId),
+        name: event.name,
+        location: event.location,
+        date: Number(event.date),
+        price: event.price.toString(),
+        capacity: Number(event.capacity),
+        ticketsSold: Number(event.ticketsSold),
+        imageUrl: event.imageUrl,
+      },
+      status,
+      qrCode: '', // Would be generated on frontend
+      transactionHash: '', // Not typically available
+      bookedAt: 0, // Not available from contract
+      usedAt: ticket.used ? Date.now() / 1000 : undefined,
+      price: Number(event.price),
     });
   } catch (error) {
     console.error('Error fetching ticket:', error);

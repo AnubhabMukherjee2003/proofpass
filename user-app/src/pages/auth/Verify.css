@@ -1,0 +1,51 @@
+.verify-content {
+  --background: #ffffff;
+}
+
+.verify-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+}
+
+.verify-card {
+  margin: auto;
+  width: 100%;
+  max-width: 500px;
+}
+
+.verify-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.otp-input-group {
+  margin-bottom: 20px;
+}
+
+.otp-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.otp-input {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  font-size: 24px;
+  letter-spacing: 8px;
+  text-align: center;
+}
+
+.timer-section {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.resend-text {
+  text-align: center;
+  margin-top: 16px;
+}

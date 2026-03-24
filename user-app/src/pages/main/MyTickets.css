@@ -1,0 +1,129 @@
+.my-tickets-content {
+  --background: #f5f5f5;
+}
+
+.ticket-count {
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.ticket-count h2 {
+  margin: 0;
+  color: #333;
+}
+
+.filter-segment {
+  padding: 12px 16px;
+  background: white;
+  margin-bottom: 12px;
+}
+
+ion-segment {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.tickets-list {
+  padding: 16px;
+}
+
+.ticket-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.ticket-card:active {
+  transform: scale(0.98);
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ticket-info h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+}
+
+.ticket-location {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  color: white;
+}
+
+.status-badge.status-active {
+  background: #22c55e;
+}
+
+.status-badge.status-used {
+  background: #888;
+}
+
+.status-badge.status-expired {
+  background: #ef4444;
+}
+
+.ticket-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.ticket-detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-detail-item .label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.ticket-detail-item .value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.ticket-action-hint {
+  font-size: 12px;
+  color: #6366f1;
+  margin: 12px 0 0 0;
+  text-align: center;
+}
+
+.loading-container,
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  flex-direction: column;
+}
+
+.empty-state h2 {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  color: #999;
+}
