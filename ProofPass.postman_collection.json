@@ -353,16 +353,79 @@
       ]
     },
     {
+      "name": "Admin Dashboard",
+      "description": "Admin-only endpoints for analytics and management",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "description": "View overall platform statistics (total events, active events, tickets sold, etc.)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Scan History",
+          "description": "Get history of scanned/verified tickets (currently returns empty - requires database)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/scan-history?limit=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "scan-history"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Entry Management",
+      "description": "Two-step gate entry verification process: 1) Scan QR to generate OTP, 2) Verify OTP to grant entry",
       "item": [
         {
           "name": "1️⃣ Scan QR - Generate OTP",
+          "description": "STEP 1: Gate staff scans user's QR code (contains ticketId + userToken) to generate a gate-specific OTP. OTP is sent to console in dev mode.",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{admin_token}}"
+                "value": "Bearer {{admin_token}}",
+                "description": "Admin/Gate staff JWT token"
               }
             ],
             "url": {
@@ -382,12 +445,14 @@
         },
         {
           "name": "2️⃣ Confirm Entry - Verify OTP",
+          "description": "STEP 2: Gate staff enters the OTP from user. System verifies OTP + phone ownership, then marks ticket as used on-chain.",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{admin_token}}"
+                "value": "Bearer {{admin_token}}",
+                "description": "Admin/Gate staff JWT token"
               },
               {
                 "key": "Content-Type",
@@ -414,6 +479,7 @@
         },
         {
           "name": "Check Ticket Status",
+          "description": "Check if a ticket has been used (scanned at gate). Returns used status only.",
           "request": {
             "method": "GET",
             "header": [
@@ -438,6 +504,7 @@
         },
         {
           "name": "Get Event Stats",
+          "description": "Get attendance statistics for an event (capacity, tickets sold, remaining)",
           "request": {
             "method": "GET",
             "header": [
