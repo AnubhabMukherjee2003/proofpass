@@ -23,6 +23,7 @@ export default function TicketCheckScreen() {
   const [otp, setOtp] = useState('');
   const [loadingScan, setLoadingScan] = useState(false);
   const [loadingConfirm, setLoadingConfirm] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState('');
 
   if (!adminToken) {
     return <Redirect href="/login" />;
@@ -37,7 +38,9 @@ export default function TicketCheckScreen() {
       setLoadingScan(true);
       const data = await scanTicket(ticketId.trim(), userToken.trim(), adminToken);
       setPhone(data.phone || '');
-      Alert.alert('OTP generated', data.message || 'Proceed to OTP verification.');
+      const delivery = data.delivery || 'LOG_ONLY';
+      setDeliveryInfo(delivery === 'SMS_SENT' ? 'Gate OTP sent by SMS to user phone.' : 'Gate OTP SMS not sent. Check backend logs or dev OTP response.');
+      Alert.alert('Gate OTP generated', data.message || 'Proceed to OTP verification.');
       if (data.otp) {
         setOtp(data.otp);
       }
@@ -72,6 +75,7 @@ export default function TicketCheckScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Ticket Checking</Text>
         <Text style={styles.subtitle}>QR scan + OTP verification</Text>
+        <Text style={styles.warning}>Use gate OTP from this scan step. Auth/login OTP will not work for entry.</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Step 1: Scan QR</Text>
@@ -94,6 +98,7 @@ export default function TicketCheckScreen() {
             <Text style={styles.scanText}>Scan & Generate OTP</Text>
           </Pressable>
           {loadingScan ? <ActivityIndicator style={styles.loader} /> : null}
+          {deliveryInfo ? <Text style={styles.info}>{deliveryInfo}</Text> : null}
         </View>
 
         <View style={styles.section}>
@@ -140,6 +145,14 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#475569',
   },
+  warning: {
+    color: '#92400e',
+    backgroundColor: '#fef3c7',
+    borderWidth: 1,
+    borderColor: '#f59e0b',
+    borderRadius: 10,
+    padding: 10,
+  },
   section: {
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -181,5 +194,9 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 4,
+  },
+  info: {
+    color: '#475569',
+    fontSize: 12,
   },
 });

@@ -56,7 +56,7 @@ export async function scanTicket(ticketId: string, userToken: string, adminToken
       headers: { Authorization: `Bearer ${adminToken}` },
     }
   );
-  return readJson<{ phone: string; otp?: string; message: string }>(res);
+  return readJson<{ phone: string; otp?: string; message: string; delivery?: 'SMS_SENT' | 'LOG_ONLY' | 'SMS_FAILED_LOG_ONLY' }>(res);
 }
 
 export async function confirmEntry(
