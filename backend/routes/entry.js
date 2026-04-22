@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { adminTokenMiddleware } = require('../utils/auth');
 const { computePhoneHash, computeGlobalPhoneHash } = require('../utils/crypto');
 const crypto = require('crypto');
+const twilio = require('twilio');
 
 const router = express.Router();
 
@@ -35,6 +36,8 @@ const contract = new ethers.Contract(
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const SALT = process.env.SALT || 'proofpass-salt-v1';
+const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const twilioPhone = process.env.TWILIO_PHONE;
 
 /**
  * Generate gate entry OTP specific to this ticket + user
@@ -102,14 +105,43 @@ router.post('/:ticketId/scan/:userToken', adminTokenMiddleware, async (req, res)
     // Generate OTP specific to this ticket + user
     const otp = generateGateOTP(userPhone, ticketId);
 
-    // Log OTP (in production, send via SMS)
+    // Always log OTP for server-side visibility.
     console.log(`\n🎫 [GATE SCAN] OTP for Ticket #${ticketId} | Phone: ${userPhone} | OTP: ${otp}\n`);
+
+    let delivery = 'LOG_ONLY';
+    let smsErrorCode = null;
+    let smsErrorMessage = null;
+    let smsSid = null;
+
+    // Send gate OTP via Twilio when configured.
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && twilioPhone) {
+      try {
+        const twilioResponse = await twilioClient.messages.create({
+          body: `Your ProofPass gate OTP for ticket #${ticketId} is: ${otp}`,
+          from: twilioPhone,
+          to: userPhone,
+        });
+        delivery = 'SMS_SENT';
+        smsSid = twilioResponse.sid || null;
+      } catch (twilioError) {
+        console.warn('Twilio gate OTP delivery failed (falling back to console log):', twilioError.message);
+        smsErrorCode = twilioError.code || null;
+        smsErrorMessage = twilioError.message || 'Twilio send failed';
+        delivery = 'SMS_FAILED_LOG_ONLY';
+      }
+    } else {
+      console.warn('Twilio gate OTP not sent: missing TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN/TWILIO_PHONE env vars');
+    }
 
     res.json({
       status: 'OTP_GENERATED',
       message: `OTP generated for ${userPhone}`,
       ticketId: Number(ticketId),
       phone: userPhone,
+      delivery,
+      smsSid,
+      smsErrorCode,
+      smsErrorMessage,
       expiresIn: '10 minutes',
       otp: process.env.NODE_ENV === 'development' ? otp : undefined,
     });
