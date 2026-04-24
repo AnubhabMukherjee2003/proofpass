@@ -1,5 +1,6 @@
 import { Redirect } from 'expo-router';
-import React, { useState } from 'react';
+import { CameraView, type BarcodeScanningResult, useCameraPermissions } from 'expo-camera';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +25,48 @@ export default function TicketCheckScreen() {
   const [loadingScan, setLoadingScan] = useState(false);
   const [loadingConfirm, setLoadingConfirm] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState('');
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [hasScanned, setHasScanned] = useState(false);
+  const [lastScan, setLastScan] = useState('');
+  const [scanError, setScanError] = useState('');
+
+  const parseScanPayload = useCallback((payload: string) => {
+    try {
+      const parsed = JSON.parse(payload);
+      const parsedTicketId = parsed.ticketId ?? parsed.id ?? parsed.ticket_id;
+      const parsedToken = parsed.token ?? parsed.userToken ?? parsed.user_token;
+
+      if (!parsedTicketId || !parsedToken) {
+        return null;
+      }
+
+      return {
+        ticketId: String(parsedTicketId),
+        token: String(parsedToken),
+      };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const onBarcodeScanned = useCallback((result: BarcodeScanningResult) => {
+    if (hasScanned) return;
+    setHasScanned(true);
+    setLastScan(result.data);
+    setScanError('');
+
+    const parsed = parseScanPayload(result.data);
+    if (!parsed) {
+      setScanError('QR does not include ticketId and token.');
+      return;
+    }
+
+    setTicketId(parsed.ticketId);
+    setUserToken(parsed.token);
+    setScannerOpen(false);
+    Alert.alert('QR scanned', 'Ticket details filled from QR.');
+  }, [hasScanned, parseScanPayload]);
 
   if (isInitializing) {
     return (
@@ -87,6 +130,49 @@ export default function TicketCheckScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Step 1: Scan QR</Text>
+          <Pressable
+            style={styles.cameraBtn}
+            onPress={async () => {
+              if (!permission?.granted) {
+                const next = await requestPermission();
+                if (!next.granted) {
+                  Alert.alert('Camera permission denied', 'Enable camera permission to scan QR codes.');
+                  return;
+                }
+              }
+              setHasScanned(false);
+              setLastScan('');
+              setScanError('');
+              setScannerOpen((value) => !value);
+            }}>
+            <Text style={styles.cameraBtnText}>{scannerOpen ? 'Close Scanner' : 'Open Camera Scanner'}</Text>
+          </Pressable>
+          {permission?.granted === false ? (
+            <Text style={styles.permissionText}>Camera permission is required to scan QR codes.</Text>
+          ) : null}
+          {scannerOpen ? (
+            <View style={styles.cameraFrame}>
+              <CameraView
+                style={styles.camera}
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                onBarcodeScanned={onBarcodeScanned}
+              />
+              <View style={styles.cameraOverlay}>
+                <Text style={styles.cameraHint}>Align QR within the frame</Text>
+              </View>
+            </View>
+          ) : null}
+          {scannerOpen ? (
+            <Pressable style={styles.retryBtn} onPress={() => setHasScanned(false)}>
+              <Text style={styles.retryText}>Scan Again</Text>
+            </Pressable>
+          ) : null}
+          {scanError ? <Text style={styles.permissionText}>{scanError}</Text> : null}
+          {lastScan ? (
+            <Text style={styles.debugText} numberOfLines={2}>
+              Last scan: {lastScan}
+            </Text>
+          ) : null}
           <TextInput
             style={styles.input}
             placeholder="Ticket ID"
@@ -185,6 +271,55 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 11,
     alignItems: 'center',
+  },
+  cameraBtn: {
+    backgroundColor: '#0ea5e9',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  cameraBtnText: {
+    color: '#082f49',
+    fontWeight: '700',
+  },
+  permissionText: {
+    color: '#b91c1c',
+    fontSize: 12,
+  },
+  cameraFrame: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    height: 240,
+    backgroundColor: '#0f172a',
+  },
+  camera: {
+    flex: 1,
+  },
+  cameraOverlay: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  cameraHint: {
+    color: '#e2e8f0',
+    fontSize: 12,
+  },
+  retryBtn: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  retryText: {
+    color: '#0f172a',
+    fontWeight: '600',
+  },
+  debugText: {
+    color: '#475569',
+    fontSize: 11,
   },
   scanText: {
     color: '#0c4a6e',
