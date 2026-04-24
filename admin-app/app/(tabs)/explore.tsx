@@ -16,7 +16,7 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 import { confirmEntry, scanTicket } from '@/lib/api';
 
 export default function TicketCheckScreen() {
-  const { adminToken } = useAdminAuth();
+  const { adminToken, isInitializing } = useAdminAuth();
   const [ticketId, setTicketId] = useState('');
   const [userToken, setUserToken] = useState('');
   const [phone, setPhone] = useState('');
@@ -24,6 +24,14 @@ export default function TicketCheckScreen() {
   const [loadingScan, setLoadingScan] = useState(false);
   const [loadingConfirm, setLoadingConfirm] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState('');
+
+  if (isInitializing) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
 
   if (!adminToken) {
     return <Redirect href="/login" />;

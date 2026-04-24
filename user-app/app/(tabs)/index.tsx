@@ -15,7 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { EventItem, getEvents } from '@/lib/api';
 
 export default function EventsScreen() {
-	const { token, logout } = useAuth();
+	const { token, logout, isInitializing } = useAuth();
 	const router = useRouter();
 	const [events, setEvents] = useState<EventItem[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -38,6 +38,14 @@ export default function EventsScreen() {
 	useEffect(() => {
 		fetchEvents();
 	}, [fetchEvents]);
+
+	if (isInitializing) {
+		return (
+			<SafeAreaView style={styles.safe}>
+				<ActivityIndicator style={styles.loader} />
+			</SafeAreaView>
+		);
+	}
 
 	if (!token) {
 		return <Redirect href="/login" />;

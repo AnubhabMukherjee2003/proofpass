@@ -17,6 +17,7 @@ import { adminLogin } from '@/lib/api';
 export default function AdminLoginScreen() {
   const {
     adminToken,
+    isInitializing,
     username,
     setUsername,
     password,
@@ -24,6 +25,14 @@ export default function AdminLoginScreen() {
     login,
   } = useAdminAuth();
   const [loading, setLoading] = useState(false);
+
+  if (isInitializing) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
 
   if (adminToken) {
     return <Redirect href="/(tabs)" />;
@@ -37,7 +46,7 @@ export default function AdminLoginScreen() {
       }
       setLoading(true);
       const data = await adminLogin(username.trim(), password);
-      login(data.token);
+      await login(data.token);
     } catch (error) {
       Alert.alert('Admin login failed', (error as Error).message);
     } finally {

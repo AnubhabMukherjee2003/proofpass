@@ -15,10 +15,18 @@ import { sendOtp, verifyOtp } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginScreen() {
-  const { token, phone, setPhone, login } = useAuth();
+  const { token, phone, setPhone, login, isInitializing } = useAuth();
   const [otp, setOtp] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  if (isInitializing) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
 
   if (token) {
     return <Redirect href="/(tabs)" />;
@@ -49,7 +57,7 @@ export default function LoginScreen() {
       }
       setLoading(true);
       const data = await verifyOtp(phone.trim(), otp.trim());
-      login(data.token, phone.trim());
+      await login(data.token, phone.trim());
     } catch (error) {
       Alert.alert('Verify OTP failed', (error as Error).message);
     } finally {

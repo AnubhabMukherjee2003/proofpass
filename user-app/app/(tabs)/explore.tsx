@@ -18,7 +18,7 @@ function qrUrl(payload: string) {
 }
 
 export default function TicketsScreen() {
-	const { token } = useAuth();
+	const { token, isInitializing } = useAuth();
 	const [tickets, setTickets] = useState<TicketItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -37,6 +37,14 @@ export default function TicketsScreen() {
 		}
 		run();
 	}, [token]);
+
+	if (isInitializing) {
+		return (
+			<SafeAreaView style={styles.safe}>
+				<ActivityIndicator style={styles.loader} />
+			</SafeAreaView>
+		);
+	}
 
 	if (!token) {
 		return <Redirect href="/login" />;

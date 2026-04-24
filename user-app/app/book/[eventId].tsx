@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { bookTicket, EventItem, getEvent } from '@/lib/api';
 
 export default function BookEventScreen() {
-  const { token } = useAuth();
+  const { token, isInitializing } = useAuth();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const router = useRouter();
   const [event, setEvent] = useState<EventItem | null>(null);
@@ -37,6 +37,14 @@ export default function BookEventScreen() {
   }, [eventId]);
 
   const parsedEventId = useMemo(() => Number(eventId), [eventId]);
+
+  if (isInitializing) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
 
   if (!token) {
     return <Redirect href="/login" />;

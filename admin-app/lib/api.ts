@@ -23,6 +23,14 @@ type DashboardResponse = {
   }>;
 };
 
+export type CreateEventPayload = {
+  name: string;
+  location: string;
+  date: number;
+  price: string;
+  capacity: number;
+};
+
 async function readJson<T>(res: Response): Promise<T> {
   const payload = await res.json();
   if (!res.ok) {
@@ -45,6 +53,19 @@ export async function getDashboard(adminToken: string) {
     headers: { Authorization: `Bearer ${adminToken}` },
   });
   return readJson<DashboardResponse>(res);
+}
+
+export async function createEvent(payload: CreateEventPayload, adminToken: string) {
+  const res = await fetch(`${API_BASE_URL}/api/events`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return readJson<{ message: string; txHash: string; imageUrl?: string }>(res);
 }
 
 export async function scanTicket(ticketId: string, userToken: string, adminToken: string) {
