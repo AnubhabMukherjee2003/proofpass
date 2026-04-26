@@ -12,10 +12,14 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Allow ProofPass Admin to scan ticket QR codes."
-      }
+      },
+      "bundleIdentifier": "com.anonymous.adminapp"
     },
     "android": {
-      "permissions": ["CAMERA"],
+      "permissions": [
+        "CAMERA",
+        "CAMERA"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -23,7 +27,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.adminapp"
     },
     "web": {
       "output": "static",
@@ -47,6 +52,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0c48447a-d7e9-47ea-8e1e-c65626294a0d"
+      }
     }
   }
 }
